@@ -52,7 +52,7 @@ sub range2regex
 	{
 		if($min == $max)
 		{
-			push @results, '^' . quotemeta $ddmin . '$';
+			push @results, quotemeta $ddmin . '$';
 		}
 		else
 		{
@@ -127,7 +127,7 @@ sub range2regex
 			}
 		}
 		
-		unshift @results, '^' . join('\.', @octets) . ($octets[-1] eq '' ? '' : '$');
+		unshift @results, join('\.', @octets) . ($octets[-1] eq '' ? '' : '$');
 	}
 	
 	$indent = ' ' x (length($indent)-2);
@@ -169,11 +169,11 @@ while(<>)
 	
 	debug "# $cidr\n";
 	my @regexps = range2regex($min, $max, $mask);
-	print map {"$_\n"} @regexps;
+	print map {"^$_\n"} @regexps;
 }
 
 
-print STDERR "Merged ranges:\n";
+print STDERR "United ranges:\n";
 print "\n";
 $ranges_str = substr $union_range, 3;
 for my $range (split /,/, $ranges_str)
@@ -183,5 +183,30 @@ for my $range (split /,/, $ranges_str)
 	my $max;
 	($min, $max) = $range =~ /(\d+)\.\.(\d+)/ or $min = $max = $range;
 	my $mask = undef; #TODO
-	print map {"$_\n"} range2regex($min, $max, $mask);
+	my @regexps = range2regex($min, $max, $mask);
+	print map {"^$_\n"} @regexps;
+	
+	for my $regex (@regexps)
+	{
+		my @octets = split /\\\./, $regex;
+		$RH->{$octets[0]}->{$octets[1]}->{$octets[2]}->{$octets[3]} = 1;
+	}
+}
+
+
+for my $o1 (keys $RH)
+{
+	print "|-- $o1\n";
+	for my $o2 (keys $RH->{$o1})
+	{
+		print "    |-- $o2\n";
+		for my $o3 (keys $RH->{$o1}->{$o2})
+		{
+			print "        |-- $o3\n";
+			for my $o4 (keys $RH->{$o1}->{$o2}->{$o3})
+			{
+				print "            |-- $o4\n";
+			}
+		}
+	}
 }
