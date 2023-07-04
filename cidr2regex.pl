@@ -185,3 +185,23 @@ for my $range (split /,/, $ranges_str)
 	my $mask = undef; #TODO
 	print map {"$_\n"} range2regex($min, $max, $mask);
 }
+
+
+__END__
+
+=pod
+
+=head1 NAME
+
+cidr2regex.pl - Translate IPv4 CIDR ranges to Regexp pattern
+
+=hea1 SIMILAR PROJECTS
+
+=over 4
+
+=item L<https://github.com/dameyerdave/cidr2regex>
+
+=back
+
+=cut
+
